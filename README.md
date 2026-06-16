@@ -1,2 +1,2 @@
-# Kubernatics_Architecture0617
-Repository demonstrating Kubernetes architecture, workload deployment, service discovery, ingress management, autoscaling, storage, monitoring, and best practices for production-grade container orchestration.
+# Kubernetes Architecture
+This repository provides a detailed overview of Kubernetes architecture and its core components. It explains how the Control Plane manages the cluster, how Worker Nodes run containerized applications, and how resources such as Pods, Deployments, Services, Ingress, ConfigMaps, Secrets, and Persistent Volumes work together to deliver scalable and highly available applications.
