@@ -1,0 +1,233 @@
+Complete Kubernetes Architecture Flow
+
+                 Control Plane
++--------------------------------------------------+
+| API Server                                       |
+| Scheduler                                        |
+| ETCD                                             |
+| Controller Manager                               |
+| Cloud Controller Manager                         |
++--------------------------------------------------+
+                      |
+                      |
+                      v
+                 Worker Node
++--------------------------------------------------+
+| Kubelet                                          |
+| Kube-Proxy                                       |
+| Container Runtime (containerd / CRI-O)           |
+| Pods                                              |
++--------------------------------------------------+
+
+Kubernetes (K8s) is a container orchestration platform used to deploy, manage, and scale containerized applications.
+
+Kubernetes architecture mainly consists of two major components:
+
+Control Plane (Master Node) – Responsible for managing the cluster.
+Data Plane (Worker Node) – Responsible for running application workloads.
+
+Before understanding Kubernetes architecture, let's first understand some basic Docker concepts.
+
+When we execute a Docker container using:
+
+docker run nginx
+
+Docker creates and runs a container.
+
+To run a container, Docker requires a Container Runtime. Historically, Kubernetes supported Docker through Dockershim, which acted as a bridge between Kubernetes and Docker.
+
+A simple analogy is Java:
+
+To run a Java application, we need a Java Runtime Environment (JRE).
+Similarly, to run containers, we need a Container Runtime.
+
+Today, Kubernetes supports multiple container runtimes such as:
+
+CRI-O
+containerd
+
+Kubernetes uses a Container Runtime Interface (CRI), which allows it to work with different container runtimes without being tightly coupled to a specific implementation.
+
+Kubernetes Architecture
+
+Kubernetes architecture is divided into:
+
++----------------------+
+|    Control Plane     |
+|    (Master Node)     |
++----------------------+
+           |
+           |
++----------------------+
+|      Worker Node     |
+|      (Data Plane)    |
++----------------------+
+
+Let's start with the Worker Node.
+
+Data Plane (Worker Node)
+
+The Data Plane is responsible for running application workloads inside Pods.
+
+1. Kubelet
+
+Kubelet is an agent that runs on every worker node.
+
+Responsibilities:
+
+Creates and manages Pods.
+Communicates with the Control Plane.
+Ensures containers are running as expected.
+Reports node and pod status back to the Control Plane.
+
+For example, if a Pod crashes, Kubelet informs the Control Plane, which can take corrective action and restart the Pod.
+
+2. Kube-Proxy
+
+Kube-Proxy is responsible for networking within Kubernetes.
+
+Responsibilities:
+
+Provides Service networking.
+Enables communication between Pods.
+Performs load balancing across Pods.
+Manages network rules using Linux iptables or IPVS.
+
+Without Kube-Proxy, services would not be able to route traffic to application Pods.
+
+3. Container Runtime
+
+The Container Runtime is responsible for running containers on worker nodes.
+
+Common runtimes include:
+
+containerd
+CRI-O
+
+The runtime performs tasks such as:
+
+Pulling container images.
+Starting containers.
+Stopping containers.
+Managing container lifecycle.
+
+Control Plane (Master Node)
+
+The Control Plane manages the entire Kubernetes cluster.
+
+It decides where applications run, monitors cluster health, and maintains the desired state.
+1. API Server
+
+The API Server is the heart of Kubernetes.
+
+Every request to Kubernetes goes through the API Server.
+
+Examples:
+
+kubectl get pods
+kubectl apply -f deployment.yaml
+
+Responsibilities:
+
+Exposes Kubernetes APIs.
+Validates requests.
+Communicates with other control plane components.
+Acts as the entry point to the cluster.
+
+When a Pod creation request is received, the API Server processes it and coordinates with other components.
+
+2. Scheduler
+
+The Scheduler is responsible for deciding where a Pod should run.
+
+Responsibilities:
+
+Selects the most suitable worker node.
+Considers CPU and memory availability.
+Considers node affinity, taints, and tolerations.
+Optimizes workload placement.
+
+Note: The API Server receives the request, but the Scheduler makes the actual placement decision.
+
+
+3. ETCD
+
+ETCD is the most critical component of Kubernetes.
+
+It is a distributed key-value store that stores the entire cluster state.
+
+Examples of data stored in ETCD:
+
+Pod information
+Node information
+Deployments
+Services
+Secrets
+ConfigMaps
+
+Key points:
+
+Source of truth for the cluster.
+Without ETCD, the cluster state cannot be recovered.
+ETCD backups are essential for disaster recovery.
+
+
+4. Controller Manager
+
+The Controller Manager runs various Kubernetes controllers.
+
+Responsibilities:
+
+Ensures desired state matches actual state.
+Monitors cluster resources continuously.
+
+Example:
+
+If a Deployment requires 3 replicas and one Pod crashes:
+
+Desired Replicas = 3
+Current Replicas = 2
+
+The Controller Manager detects the difference and creates a new Pod to maintain the desired state.
+
+Common controllers include:
+
+ReplicaSet Controller
+Deployment Controller
+Node Controller
+Endpoint Controller
+
+5. Cloud Controller Manager (CCM)
+
+The Cloud Controller Manager integrates Kubernetes with cloud providers.
+
+Examples:
+
+Amazon EKS
+Azure AKS
+Google GKE
+
+Flow:
+
+User
+  ↓
+Kubernetes
+  ↓
+Cloud Controller Manager
+  ↓
+AWS / Azure / GCP
+
+Responsibilities:
+
+Creates Load Balancers.
+Provisions cloud storage.
+Manages cloud networking resources.
+Integrates cloud-specific services with Kubernetes.
+
+For example, when a Service of type LoadBalancer is created in EKS:
+
+type: LoadBalancer
+
+The Cloud Controller Manager communicates with AWS and automatically provisions an AWS Load Balancer.
+
+Without CCM, Kubernetes cannot create or manage cloud-native resources.
